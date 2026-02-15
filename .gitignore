@@ -1,4 +1,9 @@
 .venv
 /venv
 /.venv
-
+.idea
+/.idea
+/.claude
+.claude
+.env
+/.env

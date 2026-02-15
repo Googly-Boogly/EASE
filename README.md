@@ -49,14 +49,64 @@ Traditional AI decision-making often lacks explicit safety reasoning. EASE addre
 4. **Goal Alignment** - Actions must serve the stated goal
 5. **Safety First** - Risk mitigation is built into the framework
 
-## Implementation
+## Running the API
 
-EASE is implemented as a **FastAPI-based REST API** that provides endpoints for each step of the framework, allowing AI agents to make systematic, safe decisions.
+### 1. Configure environment variables
 
-See [API Reference](api-reference.md) for implementation details.
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set your LLM provider credentials:
+
+```
+LLM_PROVIDER="anthropic"   # anthropic, openai, or google
+LLM_API_KEY="your-api-key"
+LLM_MODEL="claude-sonnet-4-20250514"
+```
+
+### 2. Run with Docker Compose (production)
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+
+The API will be available at `http://localhost:8000`.
+
+### 3. Run with Docker Compose (tests)
+
+```bash
+docker compose -f docker-compose.test.yml up --build
+```
+
+### 4. Run without Docker
+
+```bash
+pip install -r requirements.txt
+uvicorn src.main:app --reload --port 8000
+```
+
+## API Endpoints
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/v1/environment` | Analyze a request and produce a structured environment definition |
+| `POST /api/v1/actions` | Generate diverse actions for a given environment |
+| `POST /api/v1/safety` | Evaluate and improve the safety of actions |
+| `POST /api/v1/election` | Elect the best action via weighted scoring |
+| `POST /api/v1/ease` | Run the complete EASE pipeline in one call |
+
+Interactive API docs: `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc` (ReDoc).
+
+## Supported LLM Providers
+
+| Provider | `LLM_PROVIDER` | Example `LLM_MODEL` | SDK |
+|---|---|---|---|
+| Anthropic | `anthropic` | `claude-sonnet-4-20250514` | `anthropic` |
+| OpenAI | `openai` | `gpt-4o` | `openai` |
+| Google | `google` | `gemini-2.0-flash` | `google-genai` |
 
 ## Safety Rating Scale
-
 
 EASE uses a **0-10 scale** for safety ratings:
 - **9-10**: Excellent safety profile
