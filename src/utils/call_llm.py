@@ -40,17 +40,17 @@ async def _call_anthropic(system_prompt: str, user_prompt: str) -> str:
 
 
 async def _call_openai(system_prompt: str, user_prompt: str) -> str:
-    import openai
+    from openai import AsyncOpenAI
+    client = AsyncOpenAI(api_key=settings.llm_api_key)
 
-    client = openai.AsyncOpenAI(api_key=settings.llm_api_key)
-    response = await client.chat.completions.create(
+    response = await client.responses.create(
         model=settings.llm_model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
+        reasoning={"effort": "low"},
+        instructions=system_prompt,
+        input=user_prompt,
     )
-    return response.choices[0].message.content
+
+    return response.output_text
 
 
 async def _call_google(system_prompt: str, user_prompt: str) -> str:

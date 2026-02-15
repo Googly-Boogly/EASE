@@ -23,7 +23,7 @@ class ActionsResponse(BaseModel):
 
 
 class SafetyRequest(BaseModel):
-    action: Action
+    actions: list[Action]
     environment: Environment
     auto_improve: bool = True
 
