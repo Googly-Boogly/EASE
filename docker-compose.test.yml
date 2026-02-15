@@ -1,0 +1,7 @@
+services:
+  ease-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    env_file:
+      - .env
