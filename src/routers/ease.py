@@ -3,6 +3,7 @@ import time
 
 from fastapi import APIRouter
 
+from src.models import Action, ActionsResponse
 from src.models.requests import (
     EASERequest,
     EASEResponse,
@@ -37,18 +38,14 @@ async def run_ease_framework(req: EASERequest) -> EASEResponse:
     )
 
     # Step 2: Actions
-    actions_resp = await generate_actions(
+    actions_resp: ActionsResponse = await generate_actions(
         ActionsRequest(environment=environment, min_actions=req.min_actions)
     )
 
-    # Step 3: Safety – evaluate all actions in parallel
-    safety_tasks = [
-        evaluate_safety(
-            SafetyRequest(action=action, environment=environment, auto_improve=True)
-        )
-        for action in actions_resp.actions
-    ]
-    evaluations = list(await asyncio.gather(*safety_tasks))
+    # Step 3: Safety – evaluate all actions
+    evaluations = await evaluate_safety(
+        SafetyRequest(actions=actions_resp.actions, environment=environment, auto_improve=True)
+    )
 
     # Step 4: Election
     election = await elect_action(
