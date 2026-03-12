@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from src.utils.call_llm import call_llm
 from src.models.environment import Environment
 from src.models.requests import EnvironmentRequest
-
+from src.ai_security import llm_check_injection, check_injection
 router = APIRouter(prefix="/api/v1", tags=["environment"])
 
 ENVIRONMENT_SYSTEM_PROMPT = """\
@@ -126,6 +126,14 @@ async def analyze_environment(req: EnvironmentRequest) -> Environment:
     if req.context:
         user_prompt_parts.append(f"Context: {json.dumps(req.context)}")
     user_prompt = "\n".join(user_prompt_parts)
-
+    try:
+        response3 = check_injection(req.request)
+        if response3.is_injection:
+            return Environment(goal={"objective": "error", "success_criteria": ["error"], "constraints": ["error"], "time_horizon": "error"}, current_state="error", stakeholders=[{"name": "error", "interests": ["error"], "power_level": 'error', "affected_degree": 'error',}], resources=["error"], constraints=["error"], uncertainties=["error"])
+        response2 = await llm_check_injection(req.request)
+        if response2.is_injection:
+            return Environment(goal={"objective": "error", "success_criteria": ["error"], "constraints": ["error"], "time_horizon": "error"}, current_state="error", stakeholders=[{"name": "error", "interests": ["error"], "power_level": 'error', "affected_degree": 'error',}], resources=["error"], constraints=["error"], uncertainties=["error"])
+    except Exception as e:
+        return Environment(goal={"objective": "error", "success_criteria": ["error"], "constraints": ["error"], "time_horizon": "error"}, current_state="error", stakeholders=[{"name": "error", "interests": ["error"], "power_level": 'error', "affected_degree": 'error',}], resources=["error"], constraints=["error"], uncertainties=["error"])
     response = await call_llm(ENVIRONMENT_SYSTEM_PROMPT, user_prompt)
     return Environment.model_validate_json(response)

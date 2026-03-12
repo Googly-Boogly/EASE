@@ -32,6 +32,10 @@ async def run_ease_framework(req: EASERequest) -> EASEResponse:
     """
     start = time.time()
 
+    response3 = check_injection(req.request)
+    response2 = await llm_check_injection(req.request)
+    if response3.is_injection or response2.is_injection:
+        raise HTTPException(status_code=400, detail="Dont Hack Me")
     # Step 1: Environment
     environment = await analyze_environment(
         EnvironmentRequest(request=req.request, context=req.context)
