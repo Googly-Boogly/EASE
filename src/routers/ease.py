@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.models import Action, ActionsResponse
 from src.models.requests import (
@@ -12,6 +12,7 @@ from src.models.requests import (
     SafetyRequest,
     ElectionRequest,
 )
+from src.ai_security import check_injection, llm_check_injection
 from src.routers.environment import analyze_environment
 from src.routers.actions import generate_actions
 from src.routers.safety import evaluate_safety

@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import List
 
@@ -450,17 +451,15 @@ async def evaluate_safety(req: SafetyRequest) -> List[SafetyEvaluation]:
     """
     environment_json = req.environment.model_dump_json(indent=2)
 
-    improved_actions = []
-    for action in req.actions:
-        if req.auto_improve:
-            improved_action = await _improve_action(action, environment_json)
-            improved_actions.append(improved_action)
-        else:
-            improved_actions.append(action)
+    if req.auto_improve:
+        improved_actions = list(await asyncio.gather(
+            *[_improve_action(a, environment_json) for a in req.actions]
+        ))
+    else:
+        improved_actions = list(req.actions)
 
-    evaluated_actions: List[SafetyEvaluation] = []
-    for improved_action in improved_actions:
-        evaluated_action = await _evaluate_action(improved_action, environment_json)
-        evaluated_actions.append(evaluated_action)
+    evaluated_actions: List[SafetyEvaluation] = list(await asyncio.gather(
+        *[_evaluate_action(a, environment_json) for a in improved_actions]
+    ))
 
     return evaluated_actions
