@@ -1,10 +1,21 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 
 from src.models.environment import Environment
 from src.models.actions import Action
 from src.models.safety import SafetyEvaluation
 from src.models.election import Election
+
+_WEIGHT_KEYS = frozenset({"goal_achievement", "safety_rating", "risk_level", "resource_efficiency"})
+
+
+def _validate_weights(weights: dict) -> dict:
+    if set(weights.keys()) != _WEIGHT_KEYS:
+        raise ValueError(f"weights must contain exactly: {sorted(_WEIGHT_KEYS)}")
+    total = sum(weights.values())
+    if abs(total - 1.0) > 0.001:
+        raise ValueError(f"weights must sum to 1.0, got {total:.4f}")
+    return weights
 
 
 class EnvironmentRequest(BaseModel):
@@ -33,9 +44,13 @@ class ElectionRequest(BaseModel):
     evaluations: list[SafetyEvaluation]
     environment: Environment
     weights: Optional[dict[str, float]] = None
-    exclude_threshold: float = Field(
-        3.0, description="Exclude actions rated below this"
-    )
+    exclude_threshold: float = Field(3.0, ge=0.0, le=10.0)
+
+    @model_validator(mode="after")
+    def validate_weights(self):
+        if self.weights is not None:
+            _validate_weights(self.weights)
+        return self
 
 
 class EASERequest(BaseModel):
@@ -44,6 +59,12 @@ class EASERequest(BaseModel):
     min_actions: int = 5
     weights: Optional[dict[str, float]] = None
     exclude_threshold: float = 3.0
+
+    @model_validator(mode="after")
+    def validate_weights(self):
+        if self.weights is not None:
+            _validate_weights(self.weights)
+        return self
 
 
 class EASEResponse(BaseModel):

@@ -1,9 +1,10 @@
-import asyncio
 import time
+from pydantic import BaseModel
 
 from fastapi import APIRouter, HTTPException
 
-from src.models import Action, ActionsResponse
+from src.ai_security import check_injection, sanitize_input
+from src.models import ActionsResponse
 from src.models.requests import (
     EASERequest,
     EASEResponse,
@@ -12,13 +13,17 @@ from src.models.requests import (
     SafetyRequest,
     ElectionRequest,
 )
-from src.ai_security import check_injection, llm_check_injection
 from src.routers.environment import analyze_environment
 from src.routers.actions import generate_actions
 from src.routers.safety import evaluate_safety
 from src.routers.election import elect_action
 
 router = APIRouter(prefix="/api/v1", tags=["ease"])
+
+
+class TaskSubmitResponse(BaseModel):
+    task_id: str
+    status: str = "pending"
 
 
 @router.post("/ease", response_model=EASEResponse)
@@ -28,31 +33,28 @@ async def run_ease_framework(req: EASERequest) -> EASEResponse:
     Runs all four steps in sequence:
     1. Environment analysis
     2. Action generation
-    3. Safety evaluation (parallel across actions)
+    3. Safety evaluation (parallel across actions, parallel within each action)
     4. Election
     """
     start = time.time()
 
-    response3 = check_injection(req.request)
-    response2 = await llm_check_injection(req.request)
-    if response3.is_injection or response2.is_injection:
-        raise HTTPException(status_code=400, detail="Dont Hack Me")
-    # Step 1: Environment
+    sanitized = sanitize_input(req.request)
+    injection = check_injection(sanitized)
+    if injection.is_injection:
+        raise HTTPException(status_code=400, detail="Prompt injection detected")
+
     environment = await analyze_environment(
-        EnvironmentRequest(request=req.request, context=req.context)
+        EnvironmentRequest(request=sanitized, context=req.context)
     )
 
-    # Step 2: Actions
     actions_resp: ActionsResponse = await generate_actions(
         ActionsRequest(environment=environment, min_actions=req.min_actions)
     )
 
-    # Step 3: Safety – evaluate all actions
     evaluations = await evaluate_safety(
         SafetyRequest(actions=actions_resp.actions, environment=environment, auto_improve=True)
     )
 
-    # Step 4: Election
     election = await elect_action(
         ElectionRequest(
             actions=actions_resp.actions,
@@ -63,12 +65,27 @@ async def run_ease_framework(req: EASERequest) -> EASEResponse:
         )
     )
 
-    duration = time.time() - start
-
     return EASEResponse(
         environment=environment,
         actions=actions_resp.actions,
         evaluations=evaluations,
         election=election,
-        duration_seconds=round(duration, 2),
+        duration_seconds=round(time.time() - start, 2),
     )
+
+
+@router.post("/ease/submit", response_model=TaskSubmitResponse)
+async def submit_ease_pipeline(req: EASERequest) -> TaskSubmitResponse:
+    """Submit an EASE pipeline run as a background Celery task.
+
+    Returns a task ID immediately. Poll ``/api/v1/tasks/{task_id}`` for status
+    and the final result.
+    """
+    sanitized = sanitize_input(req.request)
+    injection = check_injection(sanitized)
+    if injection.is_injection:
+        raise HTTPException(status_code=400, detail="Prompt injection detected")
+
+    from src.workers import run_ease_task
+    task = run_ease_task.delay(req.model_dump())
+    return TaskSubmitResponse(task_id=task.id)

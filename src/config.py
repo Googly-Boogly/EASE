@@ -8,6 +8,13 @@ class Settings(BaseSettings):
     llm_provider: str = "anthropic"
     llm_model: str = "claude-sonnet-4-20250514"
     llm_api_key: str = ""
+    llm_max_tokens: int = 8192
+    llm_timeout_seconds: float = 60.0
+    llm_max_retries: int = 3
+
+    database_url: str = ""
+    redis_url: str = "redis://localhost:6379/0"
+    api_key: str = ""
 
     default_min_actions: int = 5
     default_safety_threshold: float = 3.0

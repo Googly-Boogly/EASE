@@ -2,10 +2,11 @@ import json
 
 from fastapi import APIRouter, HTTPException
 
-from src.utils.call_llm import call_llm
+from src.ai_security import check_injection, sanitize_input
 from src.models.environment import Environment
 from src.models.requests import EnvironmentRequest
-from src.ai_security import llm_check_injection, check_injection
+from src.utils.call_llm import call_llm
+
 router = APIRouter(prefix="/api/v1", tags=["environment"])
 
 ENVIRONMENT_SYSTEM_PROMPT = """\
@@ -122,20 +123,17 @@ async def analyze_environment(req: EnvironmentRequest) -> Environment:
     Uses LLM reasoning to parse the request, identify stakeholders,
     and structure the decision context.
     """
-    user_prompt_parts = [f"Request: {req.request}"]
+    sanitized = sanitize_input(req.request)
+
+    injection = check_injection(sanitized)
+    if injection.is_injection:
+        raise HTTPException(status_code=400, detail="Prompt injection detected")
+
+    user_prompt_parts = [f"Request: {sanitized}"]
     if req.context:
         user_prompt_parts.append(f"Context: {json.dumps(req.context)}")
     user_prompt = "\n".join(user_prompt_parts)
-    try:
-        response3 = check_injection(req.request)
-        if response3.is_injection:
-            raise HTTPException(status_code=400, detail="Prompt injection detected")
-        response2 = await llm_check_injection(req.request)
-        if response2.is_injection:
-            raise HTTPException(status_code=400, detail="Prompt injection detected")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=503, detail="Security check unavailable") from e
+
     response = await call_llm(ENVIRONMENT_SYSTEM_PROMPT, user_prompt)
-    return Environment.model_validate_json(response)
+    environment = Environment.model_validate_json(response)
+    return environment.model_copy(update={"context": req.context or {}})

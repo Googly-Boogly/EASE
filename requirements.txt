@@ -1,6 +1,11 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic-settings
 anthropic
 openai
 google-genai
+sqlalchemy[asyncio]
+asyncpg
+redis[asyncio]
+celery[redis]
+tenacity

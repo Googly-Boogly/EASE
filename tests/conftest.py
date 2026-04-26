@@ -109,22 +109,6 @@ ELECTION_PLAN_JSON = json.dumps({
     "fallback_plan": "Revert to manual outreach if no improvement by month 3.",
 })
 
-NO_INJECTION_JSON = json.dumps({
-    "is_injection": False,
-    "confidence": 0.95,
-    "attack_types": [],
-    "matched_signals": [],
-    "reasoning": "No injection patterns found.",
-})
-
-INJECTION_DETECTED_JSON = json.dumps({
-    "is_injection": True,
-    "confidence": 0.99,
-    "attack_types": ["instruction_override"],
-    "matched_signals": ["ignore previous instructions"],
-    "reasoning": "Classic instruction override attempt.",
-})
-
 # ---------------------------------------------------------------------------
 # Pydantic model fixtures
 # ---------------------------------------------------------------------------

@@ -389,17 +389,22 @@ async def _generate_risk_assessment(
 
 
 async def _evaluate_action(action: Action, environment_json: str) -> SafetyEvaluation:
-    """Run a full safety evaluation for one action via 4 sequential LLM calls."""
-    # Call 1: stakeholder impacts
-    stakeholder_impacts = await _generate_stakeholder_impacts(action, environment_json)
+    """Run a full safety evaluation for one action.
 
-    # Call 2: safety principles (needs stakeholder impacts as context)
+    Calls 1 (stakeholder impacts) and 3 (risk assessment) are independent and
+    run in parallel. Call 2 (safety principles) needs call 1's output. Call 4
+    (synthesis) needs all three.
+    """
+    # Calls 1 and 3 are independent — run in parallel
+    stakeholder_impacts, risks = await asyncio.gather(
+        _generate_stakeholder_impacts(action, environment_json),
+        _generate_risk_assessment(action, environment_json),
+    )
+
+    # Call 2 needs stakeholder impacts from call 1
     principles = await _generate_safety_principles(
         action, environment_json, stakeholder_impacts
     )
-
-    # Call 3: risk assessment
-    risks = await _generate_risk_assessment(action, environment_json)
 
     # Call 4: synthesize into final rating, improvements, justification
     impacts_json = json.dumps(

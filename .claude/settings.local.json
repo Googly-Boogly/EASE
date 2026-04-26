@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python -m pytest --collect-only)",
+      "Bash(.venv/bin/python -m pytest --collect-only)",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(.venv/bin/python *)"
     ]
   }
 }
