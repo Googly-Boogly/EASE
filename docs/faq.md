@@ -223,12 +223,19 @@ async def make_decision(request: str, context: dict):
     return response.json()
 ```
 
-**Option 2: Embed EASE directly**
+**Option 2: Submit for async processing (returns immediately)**
 ```python
-from ease_framework import EASEFramework
+import httpx
 
-ease = EASEFramework()
-election = await ease.run(request, context)
+async def submit_decision(request: str, context: dict):
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "http://ease-api:8000/api/v1/ease/submit",
+            json={"request": request, "context": context},
+            headers={"X-API-Key": "your-api-key"},
+        )
+        task_id = resp.json()["task_id"]
+    return task_id  # poll /api/v1/tasks/{task_id}
 ```
 
 ### What LLM should I use for EASE?
@@ -360,7 +367,7 @@ This suggests:
 
 - Check [best-practices.md](best-practices.md) for advanced guidance
 - Review [examples/](examples/) for worked scenarios
-- See [api-reference.md](api-reference.md) for FastAPI details
+- See [api_reference.md](api_reference.md) for FastAPI details
 - Discuss with colleagues or safety consultants
 
 Remember: EASE is a tool, not a rulebook. Use it to improve your thinking, not replace it.

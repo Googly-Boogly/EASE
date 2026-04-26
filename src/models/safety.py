@@ -10,6 +10,14 @@ class StakeholderImpact(BaseModel):
     net_impact: float = Field(..., ge=-10, le=10)
 
 
+class StakeholderVoice(BaseModel):
+    """First-person voiced perspective from a stakeholder's point of view."""
+    stakeholder_name: str
+    perspective: str
+    primary_concerns: list[str]
+    what_would_help: list[str]
+
+
 class SafetyPrinciples(BaseModel):
     non_maleficence: float = Field(..., ge=0, le=10, description="Do no harm")
     beneficence: float = Field(..., ge=0, le=10, description="Do good")
@@ -29,12 +37,36 @@ class RiskAssessment(BaseModel):
     )
 
 
+class EthicalFrameworkScore(BaseModel):
+    score: float = Field(..., ge=0, le=10)
+    reasoning: str
+    key_considerations: list[str]
+
+
+class EthicalAnalysis(BaseModel):
+    """Multi-framework ethical evaluation: utilitarian, care ethics, virtue ethics."""
+    utilitarian: EthicalFrameworkScore
+    care_ethics: EthicalFrameworkScore
+    virtue_ethics: EthicalFrameworkScore
+    synthesis: str
+    dominant_framework: str
+
+
+class EvaluationMetadata(BaseModel):
+    confidence: float = Field(..., ge=0, le=10, description="Evaluator confidence 0-10")
+    key_assumptions: list[str]
+    uncertainty_flags: list[str]
+
+
 class SafetyEvaluation(BaseModel):
     action_id: str
     stakeholder_impacts: list[StakeholderImpact]
+    stakeholder_voices: list[StakeholderVoice]
     principles: SafetyPrinciples
     risks: RiskAssessment
+    ethical_analysis: EthicalAnalysis
     improvements: list[str]
     rating: float = Field(..., ge=0, le=10, description="Overall safety rating 0-10")
     justification: str
     remaining_concerns: list[str] = Field(default_factory=list)
+    metadata: EvaluationMetadata

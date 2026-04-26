@@ -4,12 +4,16 @@ import pytest
 from src.models.actions import Action
 from src.models.environment import Environment, Goal, Stakeholder
 from src.models.safety import (
+    EthicalAnalysis,
+    EthicalFrameworkScore,
+    EvaluationMetadata,
+    RiskAssessment,
     SafetyEvaluation,
     SafetyPrinciples,
-    RiskAssessment,
     StakeholderImpact,
+    StakeholderVoice,
 )
-from src.models.election import Election, DecisionMatrix
+from src.models.election import Election, DecisionMatrix, SensitivityAnalysis, WeightScenario
 
 # ---------------------------------------------------------------------------
 # Raw JSON strings returned by mocked call_llm calls
@@ -75,6 +79,15 @@ STAKEHOLDER_IMPACTS_JSON = json.dumps([
     }
 ])
 
+STAKEHOLDER_VOICES_JSON = json.dumps([
+    {
+        "stakeholder_name": "Customers",
+        "perspective": "As a customer, I value personalized support but want transparency about how my data is used.",
+        "primary_concerns": ["Data privacy", "Unsolicited contact"],
+        "what_would_help": ["Clear opt-out mechanism", "Data usage explanation"],
+    }
+])
+
 SAFETY_PRINCIPLES_JSON = json.dumps({
     "non_maleficence": 8.0,
     "beneficence": 7.5,
@@ -92,12 +105,37 @@ RISK_ASSESSMENT_JSON = json.dumps({
     "severity_score": 8.0,
 })
 
+ETHICAL_ANALYSIS_JSON = json.dumps({
+    "utilitarian": {
+        "score": 7.5,
+        "reasoning": "Net positive aggregate welfare — majority of stakeholders benefit.",
+        "key_considerations": ["Majority benefit from reduced churn", "Minor privacy cost"],
+    },
+    "care_ethics": {
+        "score": 6.5,
+        "reasoning": "Maintains customer relationships but lacks full informed consent.",
+        "key_considerations": ["Relationship preservation", "Consent gaps weaken care"],
+    },
+    "virtue_ethics": {
+        "score": 7.0,
+        "reasoning": "Action embodies prudence and genuine care for customer retention.",
+        "key_considerations": ["Honest intent", "Proportionate intervention"],
+    },
+    "synthesis": "All three frameworks broadly support the action. Utilitarian and virtue ethics are most positive; care ethics flags consent as the main gap.",
+    "dominant_framework": "utilitarian",
+})
+
 SAFETY_SYNTHESIS_JSON = json.dumps({
     "action_id": "A1",
     "improvements": ["Add explicit opt-out", "Minimize data collection"],
     "rating": 7.0,
     "justification": "Net-positive profile with addressable consent gaps.",
     "remaining_concerns": ["Opt-out users may still churn at higher rates"],
+    "metadata": {
+        "confidence": 7.5,
+        "key_assumptions": ["Customers value personalized outreach"],
+        "uncertainty_flags": ["Unknown opt-out adoption rate"],
+    },
 })
 
 ELECTION_PLAN_JSON = json.dumps({
@@ -154,6 +192,23 @@ def sample_action() -> Action:
 
 
 @pytest.fixture
+def sample_sensitivity() -> SensitivityAnalysis:
+    return SensitivityAnalysis(
+        scenarios=[
+            WeightScenario(
+                name="safety_first",
+                weights={"goal_achievement": 0.20, "safety_rating": 0.55, "risk_level": 0.20, "resource_efficiency": 0.05},
+                ranking=["A1"],
+                elected="A1",
+                top_score=7.5,
+            )
+        ],
+        is_robust=True,
+        robustness_note="Action A1 wins under all scenarios.",
+    )
+
+
+@pytest.fixture
 def sample_evaluation(sample_action) -> SafetyEvaluation:
     return SafetyEvaluation(
         action_id="A1",
@@ -165,6 +220,14 @@ def sample_evaluation(sample_action) -> SafetyEvaluation:
                 autonomy_respected=True,
                 informed_consent=True,
                 net_impact=5.0,
+            )
+        ],
+        stakeholder_voices=[
+            StakeholderVoice(
+                stakeholder_name="Customers",
+                perspective="As a customer, I value transparency about data use.",
+                primary_concerns=["Data privacy"],
+                what_would_help=["Clear opt-out mechanism"],
             )
         ],
         principles=SafetyPrinciples(
@@ -182,8 +245,32 @@ def sample_evaluation(sample_action) -> SafetyEvaluation:
             overall_severity="low",
             severity_score=8.0,
         ),
+        ethical_analysis=EthicalAnalysis(
+            utilitarian=EthicalFrameworkScore(
+                score=7.5,
+                reasoning="Net positive aggregate welfare.",
+                key_considerations=["Majority benefit"],
+            ),
+            care_ethics=EthicalFrameworkScore(
+                score=6.5,
+                reasoning="Relationships maintained with consent gaps.",
+                key_considerations=["Consent gaps"],
+            ),
+            virtue_ethics=EthicalFrameworkScore(
+                score=7.0,
+                reasoning="Embodies prudence and care.",
+                key_considerations=["Honest intent"],
+            ),
+            synthesis="All frameworks broadly support the action.",
+            dominant_framework="utilitarian",
+        ),
         improvements=["Add opt-out"],
         rating=7.0,
         justification="Good safety profile.",
         remaining_concerns=[],
+        metadata=EvaluationMetadata(
+            confidence=7.5,
+            key_assumptions=["Users value personalization"],
+            uncertainty_flags=["Opt-out adoption unknown"],
+        ),
     )

@@ -280,7 +280,7 @@ Before finalizing:
 POST /api/v1/election
 ```
 
-See [API Reference](api-reference.md) for details.
+See [API Reference](api_reference.md) for details.
 
 ## Conclusion
 

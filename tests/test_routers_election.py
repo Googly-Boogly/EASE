@@ -24,6 +24,9 @@ async def test_elect_action_success(sample_action, sample_evaluation, sample_env
     assert result.elected_action.id == "A1"
     assert len(result.decision_matrix) == 1
     assert len(result.implementation_plan) >= 1
+    assert result.sensitivity_analysis is not None
+    assert len(result.sensitivity_analysis.scenarios) == 4
+    assert isinstance(result.sensitivity_analysis.is_robust, bool)
 
 
 async def test_elect_action_all_below_threshold_raises(
@@ -60,8 +63,8 @@ async def test_elect_action_excludes_low_rated_actions(
         )
 
     assert result.elected_action.id == "A1"
-    # Only A1 passes the threshold so the decision matrix has one entry
     assert len(result.decision_matrix) == 1
+    assert result.sensitivity_analysis.is_robust  # single action always robust
 
 
 async def test_elect_action_uses_default_weights(

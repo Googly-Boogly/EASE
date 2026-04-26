@@ -281,17 +281,14 @@ def hash_request(request: str, context: Dict) -> str:
 ### 2. Parallel Safety Evaluation
 
 ```python
-import asyncio
+from src.models.requests import SafetyRequest
+from src.routers.safety import evaluate_safety
 
-async def evaluate_all_actions_parallel(actions, environment):
-    """Evaluate multiple actions in parallel"""
-    tasks = [
-        evaluate_safety(
-            SafetyRequest(action=action, environment=environment)
-        )
-        for action in actions
-    ]
-    return await asyncio.gather(*tasks)
+async def evaluate_all_actions(actions, environment):
+    """Evaluate all actions in one call — the safety endpoint handles parallelism internally"""
+    return await evaluate_safety(
+        SafetyRequest(actions=actions, environment=environment)
+    )
 ```
 
 ### 3. Rate Limiting
@@ -310,29 +307,7 @@ async def run_ease_framework(request: Request, req: EASERequest):
 
 ### 4. Logging and Audit Trail
 
-```python
-import logging
-import json
-from datetime import datetime
-
-async def log_ease_decision(
-    environment: Environment,
-    election: Election,
-    duration: float
-):
-    """Log all EASE decisions for audit"""
-    log_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "goal": environment.goal.objective,
-        "elected_action": election.elected_action.id,
-        "safety_rating": election.elected_action.safety_rating,
-        "duration_seconds": duration,
-        "stakeholders": [s.name for s in environment.stakeholders]
-    }
-    
-    with open("ease_audit.jsonl", "a") as f:
-        f.write(json.dumps(log_entry) + "\n")
-```
+The API ships with structured JSON logging to stdout (via Python's `logging.config.dictConfig`) and optional database request logging via `RequestLoggingMiddleware`. Enable DB logging by setting `DATABASE_URL` in your environment. Every request is recorded in the `request_logs` table with endpoint, method, status code, duration, and error details.
 
 ## Anti-Patterns to Avoid
 

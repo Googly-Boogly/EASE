@@ -190,7 +190,7 @@ Before proceeding to Step 3, verify:
 POST /api/v1/actions
 ```
 
-See [API Reference](api-reference.md) for details.
+See [API Reference](api_reference.md) for details.
 
 ## Next Step
 

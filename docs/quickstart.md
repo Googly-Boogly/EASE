@@ -131,7 +131,7 @@ Apply EASE to this scenario:
 - Read [overview.md](overview.md) for full framework details
 - See [examples/](examples/) for complex scenarios
 - Review [best-practices.md](best-practices.md) for advanced tips
-- Check [api-reference.md](api-reference.md) for FastAPI implementation
+- Check [api_reference.md](api_reference.md) for FastAPI implementation
 
 ---
 

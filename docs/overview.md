@@ -424,7 +424,7 @@ EASE is implemented as a RESTful API with the following endpoints:
 - `POST /api/v1/election` - Action election
 - `POST /api/v1/ease` - Complete EASE flow
 
-See [API Reference](api-reference.md) for detailed implementation.
+See [API Reference](api_reference.md) for detailed implementation.
 
 ## Relationship to Other Frameworks
 
@@ -464,7 +464,7 @@ The framework's value comes not from mechanical application but from the discipl
 2. Study [examples/](examples/) to see EASE in action
 3. Review [best-practices.md](best-practices.md) for advanced techniques
 4. Check [FAQ.md](FAQ.md) for common questions
-5. See [api-reference.md](api-reference.md) for FastAPI implementation
+5. See [api_reference.md](api_reference.md) for FastAPI implementation
 6. Implement EASE in your own work and iterate
 
 ---

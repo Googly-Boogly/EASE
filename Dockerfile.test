@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir pytest pytest-asyncio httpx
 
 COPY src/ src/
+COPY prompts/ prompts/
 COPY tests/ tests/
 COPY pytest.ini .
 

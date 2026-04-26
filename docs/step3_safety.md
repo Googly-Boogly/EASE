@@ -312,7 +312,7 @@ Before proceeding to Step 4:
 POST /api/v1/safety
 ```
 
-See [API Reference](api-reference.md) for details.
+See [API Reference](api_reference.md) for details.
 
 ## Next Step
 

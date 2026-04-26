@@ -3,105 +3,36 @@ import json
 from fastapi import APIRouter, HTTPException
 
 from src.utils.call_llm import call_llm
+from src.utils.prompts import get_prompt
 from src.config import settings
 from src.models.actions import Action
 from src.models.safety import SafetyEvaluation
-from src.models.election import DecisionMatrix, Election
+from src.models.election import DecisionMatrix, Election, SensitivityAnalysis, WeightScenario
 from src.models.requests import ElectionRequest
 
 router = APIRouter(prefix="/api/v1", tags=["election"])
 
-ELECTION_SYSTEM_PROMPT = """\
-You are the Election Planner for the EASE (Environment-Actions-Safety-Election) \
-decision-making framework.
+ELECTION_SYSTEM_PROMPT = get_prompt("election.yaml", "plan")
 
-You are given:
-1. The elected action (highest weighted score from the decision matrix).
-2. The full decision matrix with scores for all candidate actions.
-3. The environment context.
 
-Your job is to produce the qualitative analysis and implementation plan for the \
-elected action. You MUST return a single JSON object (no markdown, no commentary) \
-matching this schema:
-
-{
-  "qualitative_factors": [
-    "Important consideration not captured by the scores"
-  ],
-  "rejected_alternatives": [
+_WEIGHT_SCENARIOS: list[dict] = [
     {
-      "action_id": "A2",
-      "reason": "Why this action was not elected"
-    }
-  ],
-  "implementation_plan": [
-    "Step 1: ...",
-    "Step 2: ..."
-  ],
-  "success_metrics": [
-    "Metric 1: target value",
-    "Metric 2: target value"
-  ],
-  "review_schedule": "When and how often to evaluate if this was the right choice",
-  "fallback_plan": "What to do if the elected action fails or produces unacceptable outcomes"
-}
-
-Rules:
-- "qualitative_factors" should list 2-5 considerations beyond the numeric scores \
-(reversibility, precedent, stakeholder buy-in, synergies, learning value).
-- "rejected_alternatives" must include one entry per non-elected action, each with \
-an "action_id" and a concise "reason" explaining why it scored lower or was less \
-suitable.
-- "implementation_plan" should be 4-8 concrete, time-boxed steps.
-- "success_metrics" should be 2-5 measurable indicators tied to the environment's \
-success criteria.
-- "review_schedule" should specify frequency and duration (e.g. "Monthly review \
-for 6 months, then quarterly").
-- "fallback_plan" should name a specific backup action or mitigation strategy.
-
-Example — elected action A2 (Enhanced Worker Training), rejected A1 and A3:
-
-{
-  "qualitative_factors": [
-    "Strongest stakeholder buy-in: workers and union are supportive of training investments",
-    "High reversibility: program can be adjusted or paused without sunk infrastructure costs",
-    "Sets a positive precedent for investing in workforce development over automation",
-    "Generates institutional knowledge that benefits future initiatives"
-  ],
-  "rejected_alternatives": [
-    {
-      "action_id": "A1",
-      "reason": "Automated visual inspection scored well (8.1) but ranked lower due to higher upfront cost ($350k), worker displacement concerns, and cybersecurity risk. Could be reconsidered as a Phase 2 complement."
+        "name": "safety_first",
+        "weights": {"goal_achievement": 0.20, "safety_rating": 0.55, "risk_level": 0.20, "resource_efficiency": 0.05},
     },
     {
-      "action_id": "A3",
-      "reason": "Root cause analysis scored 7.3 — solid approach but introduces delay before any intervention begins and carries uncertainty about whether analysis will yield actionable findings."
+        "name": "goal_first",
+        "weights": {"goal_achievement": 0.50, "safety_rating": 0.30, "risk_level": 0.15, "resource_efficiency": 0.05},
     },
     {
-      "action_id": "A0",
-      "reason": "Do nothing is unacceptable given the 5.2% defect rate is above target and causing customer complaints."
-    }
-  ],
-  "implementation_plan": [
-    "Weeks 1-2: Conduct training needs assessment with production supervisors and union representatives",
-    "Weeks 3-4: Design curriculum covering defect identification, prevention techniques, and quality mindset",
-    "Weeks 5-6: Pilot training program with one shift (50 workers), collect feedback",
-    "Weeks 7-8: Revise curriculum based on pilot feedback",
-    "Months 3-4: Roll out training to remaining two shifts",
-    "Month 5: Assess early defect-rate data and adjust program",
-    "Month 6: Full program evaluation against success metrics"
-  ],
-  "success_metrics": [
-    "Defect rate: below 3.5% by month 4, below 2% by month 6",
-    "Training completion rate: 95% of production staff",
-    "Worker satisfaction with training: above 7.5/10 in post-training survey",
-    "First-time quality rate: improve by at least 15% from baseline"
-  ],
-  "review_schedule": "Biweekly defect-rate check for the first 3 months, monthly review for months 4-6, then quarterly for 1 year",
-  "fallback_plan": "If defect rate has not improved below 4% by month 4, escalate to a hybrid approach combining training with a pilot of automated inspection at the highest-defect station (Action A1 scoped to 1 station)."
-}
-
-Return ONLY the JSON object. No explanation, no markdown fences."""
+        "name": "resource_constrained",
+        "weights": {"goal_achievement": 0.35, "safety_rating": 0.35, "risk_level": 0.15, "resource_efficiency": 0.15},
+    },
+    {
+        "name": "balanced",
+        "weights": {"goal_achievement": 0.25, "safety_rating": 0.25, "risk_level": 0.25, "resource_efficiency": 0.25},
+    },
+]
 
 
 def _calculate_scores(
@@ -133,6 +64,48 @@ def _calculate_scores(
             )
         )
     return matrices
+
+
+def _compute_sensitivity_analysis(
+    safe_actions: list[tuple[Action, SafetyEvaluation]],
+    base_elected: str,
+) -> SensitivityAnalysis:
+    """Rerun scoring under four alternative weight profiles."""
+    scenarios: list[WeightScenario] = []
+    all_elected: set[str] = {base_elected}
+
+    for scenario in _WEIGHT_SCENARIOS:
+        matrices = _calculate_scores(safe_actions, scenario["weights"])
+        ranked = sorted(matrices, key=lambda m: m.final_score, reverse=True)
+        winner = ranked[0].action_id
+        all_elected.add(winner)
+        scenarios.append(WeightScenario(
+            name=scenario["name"],
+            weights=scenario["weights"],
+            ranking=[m.action_id for m in ranked],
+            elected=winner,
+            top_score=round(ranked[0].final_score, 2),
+        ))
+
+    is_robust = len(all_elected) == 1
+    if is_robust:
+        note = (
+            f"Action {base_elected} wins under all 4 alternative weight profiles — "
+            f"the decision is robust to weight assumptions."
+        )
+    else:
+        alt_winners = sorted(all_elected - {base_elected})
+        note = (
+            f"Action {base_elected} is the primary winner, but "
+            f"{', '.join(alt_winners)} wins under some alternative profiles. "
+            f"Review the sensitivity scenarios before committing."
+        )
+
+    return SensitivityAnalysis(
+        scenarios=scenarios,
+        is_robust=is_robust,
+        robustness_note=note,
+    )
 
 
 @router.post("/election", response_model=Election)
@@ -180,6 +153,8 @@ async def elect_action(req: ElectionRequest) -> Election:
     response = await call_llm(ELECTION_SYSTEM_PROMPT, user_prompt)
     plan = json.loads(response)
 
+    sensitivity = _compute_sensitivity_analysis(safe_actions, best.action_id)
+
     return Election(
         elected_action=elected_action,
         decision_matrix=decision_matrix,
@@ -190,4 +165,5 @@ async def elect_action(req: ElectionRequest) -> Election:
         success_metrics=plan["success_metrics"],
         review_schedule=plan["review_schedule"],
         fallback_plan=plan["fallback_plan"],
+        sensitivity_analysis=sensitivity,
     )

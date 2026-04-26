@@ -21,7 +21,7 @@ def _injected() -> InjectionCheckResult:
 
 
 async def test_run_ease_success(
-    sample_environment, sample_action, sample_evaluation
+    sample_environment, sample_action, sample_evaluation, sample_sensitivity
 ):
     from src.models.election import Election, DecisionMatrix
     from src.models.requests import ActionsResponse
@@ -45,6 +45,7 @@ async def test_run_ease_success(
         success_metrics=["Churn below 12%"],
         review_schedule="Monthly",
         fallback_plan="Revert to manual outreach.",
+        sensitivity_analysis=sample_sensitivity,
     )
 
     with (
@@ -80,7 +81,7 @@ async def test_run_ease_injection_raises_400():
 
 
 async def test_run_ease_calls_all_pipeline_steps(
-    sample_environment, sample_action, sample_evaluation
+    sample_environment, sample_action, sample_evaluation, sample_sensitivity
 ):
     from src.models.election import Election, DecisionMatrix
     from src.models.requests import ActionsResponse
@@ -104,6 +105,7 @@ async def test_run_ease_calls_all_pipeline_steps(
         success_metrics=["metric"],
         review_schedule="monthly",
         fallback_plan="fallback",
+        sensitivity_analysis=sample_sensitivity,
     )
 
     with (
