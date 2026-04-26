@@ -8,5 +8,6 @@ RUN pip install --no-cache-dir pytest pytest-asyncio httpx
 
 COPY src/ src/
 COPY tests/ tests/
+COPY pytest.ini .
 
 CMD ["pytest", "tests/", "-v"]
