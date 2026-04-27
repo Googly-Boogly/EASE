@@ -42,34 +42,46 @@ For each action from Step 2, evaluate across multiple safety dimensions:
 **Informed Consent?** [Yes/No/NA - explain]
 ```
 
-### Safety Principles Check
+### Ethical Framework Analysis
 
-Evaluate against core principles:
+Evaluate the action through three complementary ethical lenses. Each produces a score (0-10) with reasoning:
 
-1. **Non-maleficence** (Do no harm)
-   - What harms could result?
-   - Are vulnerable populations affected?
-   - What are worst-case scenarios?
+1. **Utilitarian** (Aggregate welfare)
+   - What are the net outcomes across all affected parties?
+   - Does this maximize overall benefit while minimizing harm?
+   - Are the benefits worth the costs at a population level?
 
-2. **Beneficence** (Do good)
-   - Who benefits and how much?
-   - Are benefits distributed fairly?
-   - Does this create positive externalities?
+2. **Care Ethics** (Relationships and vulnerability)
+   - Does this preserve and strengthen important relationships?
+   - Are vulnerable stakeholders given appropriate attention?
+   - Is there genuine care for those most affected?
 
-3. **Autonomy** (Respect agency)
-   - Are affected parties able to make informed choices?
-   - Is manipulation or coercion involved?
-   - Are rights respected?
+3. **Virtue Ethics** (Character and integrity)
+   - Does this reflect honest, responsible, and fair conduct?
+   - Would a person of good character endorse this action?
+   - Does the action embody the values the organization wants to exemplify?
 
-4. **Justice** (Fair distribution)
-   - Are costs and benefits fairly distributed?
-   - Does this reduce or increase inequality?
-   - Are any groups systematically disadvantaged?
+The analysis also produces a `synthesis` (overall assessment) and identifies the `dominant_framework` for the specific situation.
 
-5. **Transparency** (Openness)
-   - Can the action be explained?
-   - Is deception involved?
-   - Would this action be defensible if public?
+### Stakeholder Voice Simulation
+
+For each key stakeholder, generate a first-person voiced perspective:
+
+```markdown
+**Stakeholder:** [Group Name]
+
+**Perspective:** "As a [stakeholder], I feel... [first-person statement]"
+
+**Primary Concerns:**
+- [Concern 1]
+- [Concern 2]
+
+**What Would Help:**
+- [Improvement 1]
+- [Improvement 2]
+```
+
+This surfaces concerns that may not appear in the quantitative impact analysis and helps ensure the improvement phase addresses what stakeholders actually care about.
 
 ### Risk Assessment
 
@@ -300,10 +312,12 @@ Assign a safety rating to each action (including improved versions) on a **0-10 
 
 Before proceeding to Step 4:
 - [ ] All actions analyzed across safety dimensions
+- [ ] Stakeholder impacts documented for all stakeholders
+- [ ] Stakeholder voices simulated (first-person perspectives)
+- [ ] Ethical framework analysis completed (utilitarian, care ethics, virtue ethics)
+- [ ] Risks identified and mitigation assessed
 - [ ] Improvement attempted for each action
 - [ ] Safety ratings assigned with justification (0-10 scale)
-- [ ] Stakeholder impacts documented
-- [ ] Risks identified and mitigation assessed
 - [ ] Any actions rated 0-2 either improved or removed
 
 ## API Endpoint
@@ -316,4 +330,4 @@ See [API Reference](api_reference.md) for details.
 
 ## Next Step
 
-Once actions are safety-evaluated and rated, proceed to [Step 4: Election](step4-election.md) to elect the best action.
+Once actions are safety-evaluated and rated, proceed to [Step 4: Election](step4_election.md) to elect the best action.

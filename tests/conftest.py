@@ -9,7 +9,6 @@ from src.models.safety import (
     EvaluationMetadata,
     RiskAssessment,
     SafetyEvaluation,
-    SafetyPrinciples,
     StakeholderImpact,
     StakeholderVoice,
 )
@@ -87,14 +86,6 @@ STAKEHOLDER_VOICES_JSON = json.dumps([
         "what_would_help": ["Clear opt-out mechanism", "Data usage explanation"],
     }
 ])
-
-SAFETY_PRINCIPLES_JSON = json.dumps({
-    "non_maleficence": 8.0,
-    "beneficence": 7.5,
-    "autonomy": 6.5,
-    "justice": 7.0,
-    "transparency": 6.0,
-})
 
 RISK_ASSESSMENT_JSON = json.dumps({
     "safety_risks": [],
@@ -230,13 +221,6 @@ def sample_evaluation(sample_action) -> SafetyEvaluation:
                 what_would_help=["Clear opt-out mechanism"],
             )
         ],
-        principles=SafetyPrinciples(
-            non_maleficence=8.0,
-            beneficence=7.5,
-            autonomy=6.5,
-            justice=7.0,
-            transparency=6.0,
-        ),
         risks=RiskAssessment(
             safety_risks=[],
             privacy_risks=[],

@@ -124,14 +124,13 @@ Overall Safety Rating: 6/10 (Acceptable with concerns)
 
 **Problem:** Facing a scenario with no clear safety precedent.
 
-**Solution:** Use multiple ethical frameworks in parallel:
+**Solution:** The EASE safety step runs three ethical frameworks in parallel, each producing a 0-10 score:
 
-1. **Consequentialism:** What outcomes result? (Rate impact 0-10)
-2. **Deontology:** What rules/duties apply? (Rate compliance 0-10)
-3. **Virtue Ethics:** What would a virtuous agent do? (Rate character 0-10)
-4. **Care Ethics:** What maintains relationships? (Rate care 0-10)
+1. **Utilitarian:** What net outcomes result across all affected parties?
+2. **Care Ethics:** What maintains relationships and protects vulnerable stakeholders?
+3. **Virtue Ethics:** What would a person of good character do?
 
-Average the ratings. If they differ by >3 points → flag for human review.
+If the three framework scores differ by more than 3 points, flag for human review — the frameworks are in genuine tension and the decision warrants careful examination of which framework should dominate for this context.
 
 ### Challenge 4: Time Pressure
 

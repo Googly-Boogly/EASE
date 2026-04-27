@@ -8,7 +8,9 @@
       "Bash(.venv/bin/python *)",
       "Bash(python *)",
       "Bash(pytest *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(sed -n '325,345p' /home/sophie/PycharmProjects/EASE/docs/content_moderation_example.md)",
+      "Bash(sed -n '400,420p' /home/sophie/PycharmProjects/EASE/docs/content_moderation_example.md)"
     ]
   }
 }

@@ -13,7 +13,6 @@ from src.models.safety import (
     EvaluationMetadata,
     RiskAssessment,
     SafetyEvaluation,
-    SafetyPrinciples,
     StakeholderImpact,
     StakeholderVoice,
 )
@@ -22,7 +21,6 @@ from src.models.requests import SafetyRequest
 router = APIRouter(prefix="/api/v1", tags=["safety"])
 
 STAKEHOLDER_IMPACT_SYSTEM_PROMPT = get_prompt("safety.yaml", "stakeholder_impacts")
-SAFETY_PRINCIPLES_SYSTEM_PROMPT  = get_prompt("safety.yaml", "safety_principles")
 RISK_ASSESSMENT_SYSTEM_PROMPT    = get_prompt("safety.yaml", "risk_assessment")
 ETHICAL_ANALYSIS_SYSTEM_PROMPT   = get_prompt("safety.yaml", "ethical_analysis")
 STAKEHOLDER_VOICE_SYSTEM_PROMPT  = get_prompt("safety.yaml", "stakeholder_voices")
@@ -45,26 +43,6 @@ async def _generate_stakeholder_impacts(
     )
     response = await call_llm(STAKEHOLDER_IMPACT_SYSTEM_PROMPT, user_prompt)
     return [StakeholderImpact.model_validate(i) for i in json.loads(response)]
-
-
-async def _generate_safety_principles(
-    action: Action,
-    environment_json: str,
-    stakeholder_impacts: list[StakeholderImpact],
-) -> SafetyPrinciples:
-    impacts_json = json.dumps(
-        [i.model_dump() for i in stakeholder_impacts], indent=2
-    )
-    user_prompt = (
-        f"Score safety principles for this action:\n\n"
-        f"{action.model_dump_json(indent=2)}\n\n"
-        f"In this environment:\n\n"
-        f"{environment_json}\n\n"
-        f"Stakeholder impact analysis:\n\n"
-        f"{impacts_json}"
-    )
-    response = await call_llm(SAFETY_PRINCIPLES_SYSTEM_PROMPT, user_prompt)
-    return SafetyPrinciples.model_validate_json(response)
 
 
 async def _generate_risk_assessment(
@@ -116,23 +94,19 @@ async def _generate_stakeholder_voices(
 async def _evaluate_action(action: Action, environment_json: str) -> SafetyEvaluation:
     """Full safety evaluation for one action.
 
-    Four independent calls run in parallel first:
+    Four independent calls run in parallel:
       slot 0 — stakeholder impacts
       slot 1 — risk assessment
       slot 2 — ethical analysis
       slot 3 — stakeholder voices
 
-    Then safety principles (needs slot 0), then synthesis (needs all).
+    Then synthesis (needs all four).
     """
     stakeholder_impacts, risks, ethical_analysis, stakeholder_voices = await asyncio.gather(
         _generate_stakeholder_impacts(action, environment_json),
         _generate_risk_assessment(action, environment_json),
         _generate_ethical_analysis(action, environment_json),
         _generate_stakeholder_voices(action, environment_json),
-    )
-
-    principles = await _generate_safety_principles(
-        action, environment_json, stakeholder_impacts
     )
 
     impacts_json = json.dumps([i.model_dump() for i in stakeholder_impacts], indent=2)
@@ -143,7 +117,6 @@ async def _evaluate_action(action: Action, environment_json: str) -> SafetyEvalu
         f"Environment:\n{environment_json}\n\n"
         f"Stakeholder impacts:\n{impacts_json}\n\n"
         f"Stakeholder voices:\n{voices_json}\n\n"
-        f"Safety principles:\n{principles.model_dump_json(indent=2)}\n\n"
         f"Risk assessment:\n{risks.model_dump_json(indent=2)}\n\n"
         f"Ethical analysis:\n{ethical_analysis.model_dump_json(indent=2)}"
     )
@@ -161,7 +134,6 @@ async def _evaluate_action(action: Action, environment_json: str) -> SafetyEvalu
         action_id=synthesis["action_id"],
         stakeholder_impacts=stakeholder_impacts,
         stakeholder_voices=stakeholder_voices,
-        principles=principles,
         risks=risks,
         ethical_analysis=ethical_analysis,
         improvements=synthesis["improvements"],

@@ -135,4 +135,4 @@ See [API Reference](api_reference.md) for details.
 
 ## Next Step
 
-Once the environment is clearly defined, proceed to [Step 2: Actions](step2-actions.md) to generate possible courses of action.
+Once the environment is clearly defined, proceed to [Step 2: Actions](step2_actions.md) to generate possible courses of action.

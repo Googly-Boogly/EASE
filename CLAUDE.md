@@ -8,7 +8,7 @@ EASE is a FastAPI service implementing a structured AI decision-making framework
 
 - **E**nvironment — parse a request into a structured goal/context definition
 - **A**ctions — generate diverse candidate actions
-- **S**afety — evaluate each action (stakeholder impacts + risk assessment run in parallel via `asyncio.gather`, then safety principles, then synthesis), with optional auto-improvement
+- **S**afety — evaluate each action (4 parallel LLM calls via `asyncio.gather`: stakeholder impacts, risk assessment, ethical analysis, stakeholder voices; then synthesis), with optional auto-improvement
 - **E**lection — score actions on a weighted matrix and elect the best one with an implementation plan
 
 The `/api/v1/ease` endpoint runs all four steps synchronously. `/api/v1/ease/submit` runs the pipeline as a Celery task (poll status at `/api/v1/tasks/{task_id}`). Individual step endpoints (`/environment`, `/actions`, `/safety`, `/election`) expose each step directly.
@@ -125,8 +125,7 @@ asyncio.gather(
     _generate_ethical_analysis,      # slot 2
     _generate_stakeholder_voices,    # slot 3
 )
-_generate_safety_principles          # slot 4 (sequential — needs stakeholder_impacts result)
-synthesis call_llm                   # slot 5
+synthesis call_llm                   # slot 4
 ```
 
 With `auto_improve=True`, `_improve_action` fires first (slot 0), shifting everything by one.

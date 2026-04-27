@@ -183,6 +183,19 @@ ELSE IF root cause is unclear
   THEN pilot both and measure
 ```
 
+## Sensitivity Analysis
+
+The API automatically tests the election result against four alternative weight profiles to assess robustness:
+
+| Scenario | Goal | Safety | Risk | Resources |
+|---|---|---|---|---|
+| `safety_first` | 20% | 55% | 20% | 5% |
+| `goal_first` | 50% | 30% | 15% | 5% |
+| `resource_constrained` | 35% | 35% | 15% | 15% |
+| `balanced` | 25% | 25% | 25% | 25% |
+
+If the same action wins under all four profiles plus the base weights, `is_robust` is `true` — you can proceed with high confidence. If different actions win under different profiles, review the `scenarios` output to understand which weight assumptions drive the result before committing.
+
 ## Election Documentation
 
 Once elected, document the decision:

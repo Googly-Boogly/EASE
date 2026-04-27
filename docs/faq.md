@@ -138,7 +138,6 @@ Use this as a guide:
 
 Also check:
 - Stakeholder impacts (average 0-10)
-- Safety principles (average 5 dimensions)
 - Risk severity (critical=0, low=9)
 
 ### What if I'm not a safety expert?
@@ -365,8 +364,8 @@ This suggests:
 
 ## Still Have Questions?
 
-- Check [best-practices.md](best-practices.md) for advanced guidance
-- Review [examples/](examples/) for worked scenarios
+- Check [best_practices.md](best_practices.md) for advanced guidance
+- Review [content_moderation_example.md](content_moderation_example.md) for a worked scenario
 - See [api_reference.md](api_reference.md) for FastAPI details
 - Discuss with colleagues or safety consultants
 

@@ -8,7 +8,6 @@ from tests.conftest import (
     ETHICAL_ANALYSIS_JSON,
     IMPROVED_ACTION_JSON,
     RISK_ASSESSMENT_JSON,
-    SAFETY_PRINCIPLES_JSON,
     SAFETY_SYNTHESIS_JSON,
     STAKEHOLDER_IMPACTS_JSON,
     STAKEHOLDER_VOICES_JSON,
@@ -23,8 +22,7 @@ from tests.conftest import (
 #       _generate_ethical_analysis,      ← slot 2: ETHICAL_ANALYSIS_JSON
 #       _generate_stakeholder_voices,    ← slot 3: STAKEHOLDER_VOICES_JSON
 #   )
-#   _generate_safety_principles          ← slot 4: SAFETY_PRINCIPLES_JSON
-#   synthesis call_llm                   ← slot 5: SAFETY_SYNTHESIS_JSON
+#   synthesis call_llm                   ← slot 4: SAFETY_SYNTHESIS_JSON
 #
 # With auto_improve=True, _improve_action fires first (slot 0), shifting
 # the rest by one.
@@ -35,7 +33,6 @@ EVALUATE_ONLY_RESPONSES = [
     RISK_ASSESSMENT_JSON,        # gather slot 1
     ETHICAL_ANALYSIS_JSON,       # gather slot 2
     STAKEHOLDER_VOICES_JSON,     # gather slot 3
-    SAFETY_PRINCIPLES_JSON,      # sequential after gather
     SAFETY_SYNTHESIS_JSON,       # synthesis
 ]
 
@@ -45,7 +42,6 @@ IMPROVE_THEN_EVALUATE_RESPONSES = [
     RISK_ASSESSMENT_JSON,         # gather slot 1
     ETHICAL_ANALYSIS_JSON,        # gather slot 2
     STAKEHOLDER_VOICES_JSON,      # gather slot 3
-    SAFETY_PRINCIPLES_JSON,       # sequential after gather
     SAFETY_SYNTHESIS_JSON,        # synthesis
 ]
 
@@ -88,7 +84,7 @@ async def test_evaluate_safety_returns_one_result_per_action(
 ):
     """Multi-action test patches individual helpers to avoid sensitivity to
     asyncio.gather interleaving order across two actions."""
-    from src.models.safety import RiskAssessment, SafetyPrinciples
+    from src.models.safety import RiskAssessment, EthicalAnalysis, EthicalFrameworkScore
 
     action2 = sample_action.model_copy(update={"id": "A2", "name": "Action 2"})
 
@@ -116,10 +112,6 @@ async def test_evaluate_safety_returns_one_result_per_action(
             new_callable=AsyncMock,
         ) as mock_risks,
         patch(
-            "src.routers.safety._generate_safety_principles",
-            new_callable=AsyncMock,
-        ) as mock_principles,
-        patch(
             "src.routers.safety._generate_ethical_analysis",
             new_callable=AsyncMock,
         ) as mock_ethical,
@@ -134,10 +126,6 @@ async def test_evaluate_safety_returns_one_result_per_action(
             safety_risks=[], privacy_risks=[], security_risks=[], societal_risks=[],
             overall_severity="low", severity_score=8.0,
         )
-        mock_principles.return_value = SafetyPrinciples(
-            non_maleficence=8.0, beneficence=7.5, autonomy=6.5, justice=7.0, transparency=6.0,
-        )
-        from src.models.safety import EthicalAnalysis, EthicalFrameworkScore
         mock_ethical.return_value = EthicalAnalysis(
             utilitarian=EthicalFrameworkScore(score=7.5, reasoning="ok", key_considerations=[]),
             care_ethics=EthicalFrameworkScore(score=6.5, reasoning="ok", key_considerations=[]),

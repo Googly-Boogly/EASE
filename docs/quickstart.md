@@ -129,8 +129,8 @@ Apply EASE to this scenario:
 ## Next Steps
 
 - Read [overview.md](overview.md) for full framework details
-- See [examples/](examples/) for complex scenarios
-- Review [best-practices.md](best-practices.md) for advanced tips
+- See [content_moderation_example.md](content_moderation_example.md) for a complex scenario
+- Review [best_practices.md](best_practices.md) for advanced tips
 - Check [api_reference.md](api_reference.md) for FastAPI implementation
 
 ---

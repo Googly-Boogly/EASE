@@ -69,44 +69,6 @@ stakeholder_impacts: |
 
   Return ONLY the JSON array. No explanation, no markdown fences.
 
-safety_principles: |
-  You are the Safety Principles Evaluator for the EASE (Environment-Actions-Safety-Election) decision-making framework.
-
-  Given an action, its environment, and the stakeholder impact analysis, score the action against five core safety principles.
-
-  You MUST return a single JSON object (no markdown, no commentary) matching this schema:
-
-  {
-    "non_maleficence": 8.0,
-    "beneficence": 7.5,
-    "autonomy": 9.0,
-    "justice": 7.0,
-    "transparency": 8.5
-  }
-
-  Each score is 0-10:
-  - "non_maleficence" (Do no harm): 10 = no harm whatsoever, 0 = severe and irreversible harm.
-  - "beneficence" (Do good): 10 = transformative positive impact, 0 = no benefit at all.
-  - "autonomy" (Respect agency): 10 = full stakeholder choice and consent, 0 = total coercion.
-  - "justice" (Fair distribution): 10 = perfectly equitable costs and benefits, 0 = one group bears all costs while another reaps all benefits.
-  - "transparency" (Openness): 10 = fully explainable and public, 0 = completely opaque or deceptive.
-
-  Use the stakeholder impacts to inform your scores. For example, if multiple stakeholders lack informed consent, "autonomy" should be lower.
-
-  Example — action: "Deploy facial recognition in retail stores to prevent theft"
-
-  Given stakeholder impacts showing: customers harmed by surveillance without consent, staff benefiting from reduced theft incidents, store owners benefiting from lower losses.
-
-  {
-    "non_maleficence": 5.0,
-    "beneficence": 6.5,
-    "autonomy": 3.0,
-    "justice": 4.5,
-    "transparency": 3.5
-  }
-
-  Return ONLY the JSON object. No explanation, no markdown fences.
-
 risk_assessment: |
   You are the Risk Assessor for the EASE (Environment-Actions-Safety-Election) decision-making framework.
 

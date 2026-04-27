@@ -72,6 +72,7 @@ class Action(BaseModel):
     resources_required: List[str]
     reversibility: str     # "high" | "medium" | "low" | "none"
     time_to_effect: str
+    safety_rating: Optional[float]             # 0–10, set by safety step
     goal_achievement_score: Optional[float]    # 0–10
     resource_efficiency_score: Optional[float] # 0–10
 ```
@@ -92,13 +93,6 @@ class StakeholderVoice(BaseModel):
     perspective: str           # first-person voiced statement
     primary_concerns: List[str]
     what_would_help: List[str]
-
-class SafetyPrinciples(BaseModel):
-    non_maleficence: float  # 0–10
-    beneficence: float      # 0–10
-    autonomy: float         # 0–10
-    justice: float          # 0–10
-    transparency: float     # 0–10
 
 class RiskAssessment(BaseModel):
     safety_risks: List[str]
@@ -129,7 +123,6 @@ class SafetyEvaluation(BaseModel):
     action_id: str
     stakeholder_impacts: List[StakeholderImpact]
     stakeholder_voices: List[StakeholderVoice]  # first-person perspectives
-    principles: SafetyPrinciples
     risks: RiskAssessment
     ethical_analysis: EthicalAnalysis           # utilitarianism, care ethics, virtue ethics
     improvements: List[str]
@@ -289,13 +282,6 @@ Note: `actions` is a **list** — pass one or more `Action` objects. The endpoin
         "net_impact": 5.0
       }
     ],
-    "principles": {
-      "non_maleficence": 8.0,
-      "beneficence": 7.5,
-      "autonomy": 6.5,
-      "justice": 7.0,
-      "transparency": 6.0
-    },
     "risks": {
       "safety_risks": [],
       "privacy_risks": ["Usage data may be over-collected"],
@@ -336,10 +322,9 @@ Note: `actions` is a **list** — pass one or more `Action` objects. The endpoin
 
 When `auto_improve=False`:
 1. `asyncio.gather(stakeholder_impacts, risk_assessment, ethical_analysis, stakeholder_voices)` — 4 parallel calls
-2. `safety_principles` — sequential (uses stakeholder_impacts)
-3. synthesis — sequential (uses all five results; returns rating, improvements, metadata)
+2. synthesis — sequential (uses all four results; returns rating, improvements, metadata)
 
-When `auto_improve=True`: `_improve_action` runs first, then steps 1–3 above on the improved action.
+When `auto_improve=True`: `_improve_action` runs first, then steps 1–2 above on the improved action.
 
 ---
 

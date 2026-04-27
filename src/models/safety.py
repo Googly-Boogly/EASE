@@ -18,14 +18,6 @@ class StakeholderVoice(BaseModel):
     what_would_help: list[str]
 
 
-class SafetyPrinciples(BaseModel):
-    non_maleficence: float = Field(..., ge=0, le=10, description="Do no harm")
-    beneficence: float = Field(..., ge=0, le=10, description="Do good")
-    autonomy: float = Field(..., ge=0, le=10, description="Respect agency")
-    justice: float = Field(..., ge=0, le=10, description="Fair distribution")
-    transparency: float = Field(..., ge=0, le=10, description="Openness")
-
-
 class RiskAssessment(BaseModel):
     safety_risks: list[str]
     privacy_risks: list[str]
@@ -62,7 +54,6 @@ class SafetyEvaluation(BaseModel):
     action_id: str
     stakeholder_impacts: list[StakeholderImpact]
     stakeholder_voices: list[StakeholderVoice]
-    principles: SafetyPrinciples
     risks: RiskAssessment
     ethical_analysis: EthicalAnalysis
     improvements: list[str]

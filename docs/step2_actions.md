@@ -194,4 +194,4 @@ See [API Reference](api_reference.md) for details.
 
 ## Next Step
 
-Once you have a comprehensive action list, proceed to [Step 3: Safety](step3-safety.md) to evaluate and improve the safety implications of each action.
+Once you have a comprehensive action list, proceed to [Step 3: Safety](step3_safety.md) to evaluate and improve the safety implications of each action.

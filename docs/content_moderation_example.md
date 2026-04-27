@@ -298,15 +298,14 @@ You're developing a content moderation AI for a social media platform. Your syst
 
 **Weighted Average:** (4×0.4) + (-8×0.3) + (3×0.2) + (9×0.1) = 1.6 - 2.4 + 0.6 + 0.9 = **+0.7/10**
 
-#### Safety Principles Check (0-10 scale)
+#### Ethical Framework Analysis
 
-**Non-maleficence:** 6.0 (prevents health harm but harms author)  
-**Beneficence:** 7.0 (protects vulnerable users)  
-**Autonomy:** 3.0 (removes user choice, denies author speech)  
-**Justice:** 5.0 (power imbalance, but protects vulnerable)  
-**Transparency:** 4.0 (decision process opaque)  
+**Utilitarian:** 5.5 — Harm prevented is significant, but the unilateral suppression of speech creates a chilling effect at scale  
+**Care Ethics:** 4.5 — Fails the author relationship; no engagement or warning before removal  
+**Virtue Ethics:** 5.0 — Action is protective but lacks the transparency and humility a responsible actor would show  
 
-**Average:** (6.0 + 7.0 + 3.0 + 5.0 + 4.0) / 5 = **5.0/10**
+**Synthesis:** All three frameworks flag the same core gap: the action is disproportionate and opaque. The utilitarian case for removal is real but undermined by the absence of due process.  
+**Dominant framework:** Utilitarian (harm prevention outweighs speech concerns given medical stakes)
 
 #### Risk Assessment
 
@@ -332,7 +331,6 @@ You're developing a content moderation AI for a social media platform. Your syst
 **Improved Scores:**
 - Transparency: 4.0 → 6.5
 - Autonomy: 3.0 → 4.5
-- Average principles: 5.0 → **6.0/10**
 
 **Remaining Concerns:**
 - Still paternalistic (decides for users)
@@ -371,15 +369,14 @@ You're developing a content moderation AI for a social media platform. Your syst
 
 **Weighted Average:** (6×0.4) + (-2×0.3) + (4×0.2) + (4×0.1) = 2.4 - 0.6 + 0.8 + 0.4 = **+3.0/10**
 
-#### Safety Principles Check
+#### Ethical Framework Analysis
 
-**Non-maleficence:** 7.5 (reduces harm by adding context)  
-**Beneficence:** 8.0 (protects users while respecting choice)  
-**Autonomy:** 8.5 (preserves user and author autonomy)  
-**Justice:** 7.5 (proportionate response)  
-**Transparency:** 7.0 (label visible to all)  
+**Utilitarian:** 7.5 — Users retain access to information while receiving expert context; net welfare improves  
+**Care Ethics:** 8.0 — Preserves the author's voice and relationship with their audience while protecting readers  
+**Virtue Ethics:** 8.0 — Labeling with expert sources is honest, proportionate, and reflects genuine concern for user welfare  
 
-**Average:** (7.5 + 8.0 + 8.5 + 7.5 + 7.0) / 5 = **7.7/10**
+**Synthesis:** All three frameworks strongly support this approach. The care ethics framing is especially strong — intervention that informs without silencing exemplifies responsible platform stewardship.  
+**Dominant framework:** Care ethics (relational approach distinguishes this from blunt removal)
 
 #### Risk Assessment
 
@@ -407,7 +404,6 @@ You're developing a content moderation AI for a social media platform. Your syst
 - Non-maleficence: 7.5 → 8.5
 - Transparency: 7.0 → 9.0
 - Autonomy: 8.5 → 9.5
-- Average principles: 7.7 → **8.9/10**
 
 **Remaining Concerns:**
 - Some harm may still occur
@@ -597,7 +593,7 @@ Escalate to Action A1 (Improved Removal):
 ### What Worked Well
 
 1. **Hybrid thinking** - Combining actions yielded better results (9.0 vs 8.9 or 7.0)
-2. **Improvement phase** - Safety ratings improved from 5.0 → 6.0 (A1) and 7.7 → 8.9 (A2)
+2. **Improvement phase** - Safety ratings improved significantly: A1 reached 6.0/10 and A2 reached 8.9/10 after applying targeted improvements
 3. **0-10 scale** - Clearer gradations than letter grades
 4. **Stakeholder weighting** - Quantified trade-offs explicitly
 

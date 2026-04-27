@@ -95,7 +95,8 @@ Perfect solutions rarely exist. EASE helps find the best available option.
 
 **Key Activities:**
 - Analyze stakeholder impacts
-- Check against safety principles
+- Simulate stakeholder voices (first-person perspectives)
+- Conduct ethical framework analysis (utilitarian, care ethics, virtue ethics)
 - Assess risks
 - Attempt improvements
 - Rate each action (0-10 scale)
@@ -151,7 +152,7 @@ Perfect solutions rarely exist. EASE helps find the best available option.
 ┌─────────────────────┐
 │  STEP 3: SAFETY     │
 │  - Analyze impact   │
-│  - Check principles │
+│  - Ethical analysis │
 │  - Improve actions  │
 │  - Rate 0-10        │
 └──────────┬──────────┘
@@ -238,8 +239,8 @@ How well does this action accomplish the stated objective?
 From Step 3 evaluation
 
 **Factors:**
-- Stakeholder impacts
-- Principle alignment
+- Stakeholder impacts and voices
+- Ethical analysis (utilitarian, care ethics, virtue ethics)
 - Risk assessment
 - Improvement quality
 
@@ -418,11 +419,14 @@ Missing or ignoring affected parties.
 
 EASE is implemented as a RESTful API with the following endpoints:
 
+- `GET  /health` - Health check (no auth required)
 - `POST /api/v1/environment` - Environment analysis
 - `POST /api/v1/actions` - Action generation
 - `POST /api/v1/safety` - Safety evaluation
 - `POST /api/v1/election` - Action election
-- `POST /api/v1/ease` - Complete EASE flow
+- `POST /api/v1/ease` - Complete EASE flow (synchronous)
+- `POST /api/v1/ease/submit` - Submit EASE pipeline as async Celery task
+- `GET  /api/v1/tasks/{task_id}` - Poll async task status
 
 See [API Reference](api_reference.md) for detailed implementation.
 
@@ -461,9 +465,9 @@ The framework's value comes not from mechanical application but from the discipl
 ## Next Steps
 
 1. Read [quickstart.md](quickstart.md) to try EASE immediately
-2. Study [examples/](examples/) to see EASE in action
-3. Review [best-practices.md](best-practices.md) for advanced techniques
-4. Check [FAQ.md](FAQ.md) for common questions
+2. Study [content_moderation_example.md](content_moderation_example.md) to see EASE in action
+3. Review [best_practices.md](best_practices.md) for advanced techniques
+4. Check [faq.md](faq.md) for common questions
 5. See [api_reference.md](api_reference.md) for FastAPI implementation
 6. Implement EASE in your own work and iterate
 
